@@ -8,7 +8,6 @@
 #include "includes.h"
 #include "simpleTypes.h"
 #include "fmt/format.h"
-#include "cassert"
 
 template<u64 StaticSize>
 class FixedString {
@@ -42,10 +41,9 @@ public:
 	FixedString& Format(pcstr format, T&& ... args)
 	{
 		auto result = fmt::format_to_n(data, StaticSize, fmt::runtime(format), std::forward<T>(args)...);
+		ASSERT(result.size < StaticSize);
+
 		_size = result.size;
-
-		ASSERT(_size < StaticSize);
-
 		*result.out = 0;
 
 		return *this;

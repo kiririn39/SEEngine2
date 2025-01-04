@@ -6,11 +6,12 @@
 #define UNTITLED4_INCLUDES_H
 
 #include "raylib.h"
-#include "fmt/format.h"
 #include "simpleTypes.h"
 #include "glm/glm.hpp"
 
+#ifndef GLM_ENABLE_EXPERIMENTAL
 #define GLM_ENABLE_EXPERIMENTAL
+#endif
 #include "glm/ext.hpp"
 
 #ifdef DEBUG
@@ -24,5 +25,8 @@
 #else
 #define ASSERT_EXTRA(X)
 #endif
+
+#include "semath.h"
+#include "sestring.h"
 
 #endif //UNTITLED4_INCLUDES_H

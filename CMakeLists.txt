@@ -69,13 +69,11 @@ endif ()
 
 
 add_executable(${PROJECT_NAME} main.cpp includes.h
-        string.cpp
-        string.h
+        sestring.cpp
+        sestring.h
         simpleTypes.h
         virtualFileSystem.cpp
         virtualFileSystem.h
-        Spatial.cpp
-        Spatial.h
         semath.cpp
         semath.h
         Components/GameObject.cpp

@@ -6,7 +6,6 @@
 #define UNTITLED4_SIMPLETYPES_H
 
 #include "cstdint"
-#include "cassert"
 
 typedef std::int64_t s64;
 typedef std::int32_t s32;
@@ -17,6 +16,9 @@ typedef std::uint64_t u64;
 typedef std::uint32_t u32;
 typedef std::uint16_t u16;
 typedef std::uint8_t u8;
+
+typedef float fp32;
+typedef double fp64;
 
 typedef const char* pcstr;
 typedef char* pstr;

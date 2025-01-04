@@ -1,5 +1,4 @@
 #include "includes.h"
-#include "string.h"
 
 void RenderUI(){
 	static u64 counter = 0;
