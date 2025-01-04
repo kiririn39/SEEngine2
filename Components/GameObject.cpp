@@ -5,6 +5,7 @@
 #include "GameObject.h"
 #include <config.h>
 #include "rlgl.h"
+#include "SEEngine.h"
 
 #pragma region RCORE.C API
 typedef struct
@@ -137,8 +138,69 @@ std::shared_ptr<SE::GameObject> SE::GameObject::Create(pcstr name)
 
 	result->_name.Format(name);
 	result->AddComponentPrivate<Transform>();
+	gEngine->AddGameObject(result);
 
 	return result;
+}
+
+u32 SE::GameObject::DoDestroy()
+{
+	u32 destroyedCount = 0;
+
+	for (int i = 0; i < _componentsCount; ++i)
+	{
+		_components[i]->OnDestroy();
+		_components[i].release();
+
+		destroyedCount++;
+	}
+
+	_componentsCount = 0;
+	gEngine->RemoveGameObject(this);
+
+	// TODO implement gameobject hierarchy destruction logic
+
+	return destroyedCount;
+}
+
+u32 SE::GameObject::DoDestroyScheduledComponents()
+{
+	u32 destroyedCount = 0;
+
+	for (int i = 0; i < _componentsCount;)
+	{
+		auto component = _components[i].get();
+		if (!component->IsScheduledForDestroy())
+		{
+			++i;
+			continue;
+		}
+
+		component->OnDestroy();
+		_components[i].release();
+
+		if (i != _componentsCount - 1)
+		{
+			std::swap(_components[i], _components[_componentsCount - 1]);
+		}
+
+		_componentsCount--;
+
+		destroyedCount++;
+	}
+
+	return destroyedCount;
+}
+
+void SE::MeshRendererComponent::Start()
+{
+	gEngine->AddRenderable(this);
+}
+
+void SE::MeshRendererComponent::OnDestroy()
+{
+	Unload();
+	gEngine->RemoveRenderable(this);
 }
 
 void SE::MeshRendererComponent::SetPath(pcstr path)
@@ -173,7 +235,7 @@ void SE::MeshRendererComponent::Unload()
 	UnloadModel(_model);
 }
 
-void SE::MeshRendererComponent::Render() const
+void SE::MeshRendererComponent::Render()
 {
 	if (!_isLoaded || !_isEnabled)
 		return;

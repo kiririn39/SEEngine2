@@ -31,4 +31,11 @@
 #include "semath.h"
 #include "sestring.h"
 
+namespace SE
+{
+	class Engine;
+}
+
+extern SE::Engine* gEngine;
+
 #endif //UNTITLED4_INCLUDES_H

@@ -19,14 +19,31 @@ namespace SE
 		return det > EPSILON && det <= maxDet;
 	}
 
+	class IRenderable
+	{
+	public:
+		virtual void Render() = 0;
+	};
+
 	class Component
 	{
 	protected:
 		GameObject* _owner = nullptr;
 		bool _isEnabled = true;
+		bool _scheduledForDestroy = false;
 
 	public:
 		virtual ~Component() = default;
+
+		void ScheduleDestroy()
+		{
+			_scheduledForDestroy = true;
+		}
+
+		bool IsScheduledForDestroy() const
+		{
+			return _scheduledForDestroy;
+		}
 
 		virtual void Start()
 		{
@@ -41,6 +58,10 @@ namespace SE
 		}
 
 		virtual void OnDisable()
+		{
+		}
+
+		virtual void OnDestroy()
 		{
 		}
 
@@ -218,9 +239,10 @@ namespace SE
 	{
 	private:
 		FixedString<64> _name{};
-		bool _isEnabled = true;
-		std::array<std::shared_ptr<Component>, 10> _components{};
+		std::array<std::unique_ptr<Component>, 10> _components{};
 		u8 _componentsCount = 0;
+		bool _isEnabled = true;
+		bool _scheduledForDestroy = false;
 
 	private:
 		template<typename T, typename... Args>
@@ -228,7 +250,7 @@ namespace SE
 		{
 			s8 itemsLeft = _components.size() - _componentsCount;
 			ASSERT(itemsLeft > 0);
-			std::shared_ptr<T> item = std::make_shared<T>(std::forward<Args>(args)...);
+			std::unique_ptr<T> item = std::make_unique<T>(std::forward<Args>(args)...);
 
 			_components[_componentsCount] = std::move(item);
 			auto ptr = _components[_componentsCount].get();
@@ -244,6 +266,20 @@ namespace SE
 		static std::shared_ptr<GameObject> Create();
 
 		static std::shared_ptr<GameObject> Create(pcstr name);
+
+		void ScheduleDestroy()
+		{
+			_scheduledForDestroy = true;
+		}
+
+		bool IsScheduledForDestroy() const
+		{
+			return _scheduledForDestroy;
+		}
+
+		u32 DoDestroy();
+
+		u32 DoDestroyScheduledComponents();
 
 		Transform* GetTransform() const
 		{
@@ -349,7 +385,7 @@ namespace SE
 		}
 	};
 
-	class MeshRendererComponent : public Component
+	class MeshRendererComponent : public Component, public IRenderable
 	{
 	private:
 		FixedString<128> _path{};
@@ -357,6 +393,12 @@ namespace SE
 		Model _model{};
 
 	public:
+		virtual void Start() override;
+
+		virtual void OnDestroy() override;
+
+		virtual void Render() override;
+
 		void SetPath(pcstr path);
 
 		void Load(pcstr path);
@@ -364,8 +406,6 @@ namespace SE
 		void Load();
 
 		void Unload();
-
-		void Render() const;
 	};
 
 	class CameraComponent : public Component
