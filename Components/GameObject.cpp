@@ -143,10 +143,14 @@ std::shared_ptr<SE::GameObject> SE::GameObject::Create(pcstr name)
 
 void SE::MeshRendererComponent::SetPath(pcstr path)
 {
-	if (_isLoaded)
-		Unload();
-
 	_path.Format(path);
+}
+
+void SE::MeshRendererComponent::Load(pcstr path)
+{
+	SetPath(path);
+	Unload();
+	Load();
 }
 
 void SE::MeshRendererComponent::Load()

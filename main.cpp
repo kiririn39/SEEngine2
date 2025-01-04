@@ -26,22 +26,20 @@ int main()
 
 	InitWindow(screenWidth, screenHeight, "raylib [core] example - basic window");
 
-	SetTargetFPS(60); // Set our game to run at 60 frames-per-second
+	SetTargetFPS(60);
 	//--------------------------------------------------------------------------------------
-
-	// Camera camera = { 0 };
-	// camera.position = (Vector3){ 50.0f, 50.0f, 50.0f }; // Camera position
-	// camera.target = (Vector3){ 0.0f, 10.0f, 0.0f }; // Camera looking at point
-	// camera.up = (Vector3){ 0.0f, 1.0f, 0.0f }; // Camera up vector (rotation towards target)
-	// camera.fovy = 45.0f; // Camera field-of-view Y
-	// camera.projection = CAMERA_PERSPECTIVE; // Camera mode type
-
-	Model model = LoadModel(RESOURCES_PATH "kenney_toy-car-kit/Models/OBJ format/vehicle-racer.obj"); // Load model
 
 	std::shared_ptr<SE::GameObject> cameraObject = SE::GameObject::Create("camera object");
 	SE::CameraComponent* camera = cameraObject->AddComponent<SE::CameraComponent>();
-	//Texture2D texture = LoadTexture("Resources/Models/yellowcar/car-tex.png");
-	//model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
+
+	std::shared_ptr<SE::GameObject> carObject = SE::GameObject::Create("car");
+	SE::MeshRendererComponent* mesh = carObject->AddComponent<SE::MeshRendererComponent>();
+	carObject->GetTransform()->SetScale(10.0f);
+	mesh->Load(RESOURCES_PATH "kenney_toy-car-kit/Models/OBJ format/vehicle-racer.obj");
+
+	cameraObject->GetTransform()->SetPosition({ 50.0f, 50.0f, 50.0f });
+	cameraObject->GetTransform()->LookAt({ 0.0f, 10.0f, 0.0f }, SE::UP);
+
 	// Main game loop
 	while (!WindowShouldClose()) // Detect window close button or ESC key
 	{
@@ -58,11 +56,9 @@ int main()
 		RenderUI();
 
 		camera->BeginRender3D();
-		//BeginMode3D(camera);
 
-		DrawModel(model, { 0, 0, 0 }, 10.0f, WHITE);
+		mesh->Render();
 
-		//EndMode3D();
 		camera->EndRender3D();
 		EndDrawing();
 		//----------------------------------------------------------------------------------

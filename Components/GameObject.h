@@ -120,6 +120,11 @@ namespace SE
 			ASSERT_EXTRA(IsDetValid(_transformation));
 		}
 
+		void LookAt(Vector3 target, Vector3 up)
+		{
+			_transformation = MatrixLookAt(GetPosition(), target, up);
+		}
+
 		void SetRotation(Quaternion rotation)
 		{
 			Matrix rotationMatrix = QuaternionToMatrix(rotation);
@@ -168,6 +173,11 @@ namespace SE
 				s = Vector3Negate(s);
 
 			return s;
+		}
+
+		void SetScale(fp32 scale)
+		{
+			SetScale({ scale, scale, scale });
 		}
 
 		void SetScale(Vector3 scale)
@@ -348,6 +358,8 @@ namespace SE
 
 	public:
 		void SetPath(pcstr path);
+
+		void Load(pcstr path);
 
 		void Load();
 
