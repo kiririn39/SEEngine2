@@ -78,6 +78,8 @@ add_executable(${PROJECT_NAME} main.cpp includes.h
         semath.h
         Components/GameObject.cpp
         Components/GameObject.h
+        SEEngine.cpp
+        SEEngine.h
 )
 target_link_libraries(${PROJECT_NAME} PUBLIC raylib raylib_cpp fmt glm)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR})

@@ -1,8 +1,10 @@
 #include "includes.h"
+#include "Components/GameObject.h"
 
-void RenderUI(){
+void RenderUI()
+{
 	static u64 counter = 0;
-	
+
 	counter++;
 
 	String text;
@@ -24,22 +26,24 @@ int main()
 
 	InitWindow(screenWidth, screenHeight, "raylib [core] example - basic window");
 
-	SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
+	SetTargetFPS(60); // Set our game to run at 60 frames-per-second
 	//--------------------------------------------------------------------------------------
 
-	Camera camera = {0};
-	camera.position = (Vector3) {50.0f, 50.0f, 50.0f}; // Camera position
-	camera.target = (Vector3) {0.0f, 10.0f, 0.0f};     // Camera looking at point
-	camera.up = (Vector3) {0.0f, 1.0f, 0.0f};          // Camera up vector (rotation towards target)
-	camera.fovy = 45.0f;                                // Camera field-of-view Y
-	camera.projection = CAMERA_PERSPECTIVE;                   // Camera mode type
+	// Camera camera = { 0 };
+	// camera.position = (Vector3){ 50.0f, 50.0f, 50.0f }; // Camera position
+	// camera.target = (Vector3){ 0.0f, 10.0f, 0.0f }; // Camera looking at point
+	// camera.up = (Vector3){ 0.0f, 1.0f, 0.0f }; // Camera up vector (rotation towards target)
+	// camera.fovy = 45.0f; // Camera field-of-view Y
+	// camera.projection = CAMERA_PERSPECTIVE; // Camera mode type
 
-	Model model = LoadModel("Resources/kenney_toy-car-kit/Models/OBJ format/vehicle-racer.obj");                 // Load model
-			
+	Model model = LoadModel(RESOURCES_PATH "kenney_toy-car-kit/Models/OBJ format/vehicle-racer.obj"); // Load model
+
+	std::shared_ptr<SE::GameObject> cameraObject = SE::GameObject::Create("camera object");
+	SE::CameraComponent* camera = cameraObject->AddComponent<SE::CameraComponent>();
 	//Texture2D texture = LoadTexture("Resources/Models/yellowcar/car-tex.png");
 	//model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
 	// Main game loop
-	while (!WindowShouldClose())    // Detect window close button or ESC key
+	while (!WindowShouldClose()) // Detect window close button or ESC key
 	{
 		// Update
 		//----------------------------------------------------------------------------------
@@ -53,18 +57,20 @@ int main()
 
 		RenderUI();
 
-		BeginMode3D(camera);
+		camera->BeginRender3D();
+		//BeginMode3D(camera);
 
-		DrawModel(model, {0, 0, 0}, 10.0f, WHITE);
+		DrawModel(model, { 0, 0, 0 }, 10.0f, WHITE);
 
-		EndMode3D();
+		//EndMode3D();
+		camera->EndRender3D();
 		EndDrawing();
 		//----------------------------------------------------------------------------------
 	}
 
 	// De-Initialization
 	//--------------------------------------------------------------------------------------
-	CloseWindow();        // Close window and OpenGL context
+	CloseWindow(); // Close window and OpenGL context
 	//--------------------------------------------------------------------------------------
 
 	return 0;

@@ -21,11 +21,13 @@ namespace SE
 
 	class Component
 	{
-	private:
+	protected:
 		GameObject* _owner = nullptr;
 		bool _isEnabled = true;
 
 	public:
+		virtual ~Component() = default;
+
 		virtual void Start()
 		{
 		}
@@ -74,7 +76,7 @@ namespace SE
 
 	class Transform : public Component
 	{
-	private:
+	protected:
 		Matrix _transformation{};
 
 	public:
@@ -190,15 +192,43 @@ namespace SE
 			_transformation.m6 = zAxis.y;
 			_transformation.m10 = zAxis.z;
 		}
+
+		Matrix GetTransformation() const
+		{
+			return _transformation;
+		}
+
+		void SetTransformation(Matrix transformation)
+		{
+			_transformation = transformation;
+		}
 	};
 
-	class GameObject
+	class GameObject final
 	{
 	private:
 		FixedString<64> _name{};
 		bool _isEnabled = true;
 		std::array<std::shared_ptr<Component>, 10> _components{};
 		u8 _componentsCount = 0;
+
+	private:
+		template<typename T, typename... Args>
+		T* AddComponentPrivate(Args&&... args)
+		{
+			s8 itemsLeft = _components.size() - _componentsCount;
+			ASSERT(itemsLeft > 0);
+			std::shared_ptr<T> item = std::make_shared<T>(std::forward<Args>(args)...);
+
+			_components[_componentsCount] = std::move(item);
+			auto ptr = _components[_componentsCount].get();
+			_componentsCount++;
+
+			ptr->SetGameObject(this);
+			ptr->Start();
+
+			return dynamic_cast<T*>(ptr);
+		}
 
 	public:
 		static std::shared_ptr<GameObject> Create();
@@ -249,7 +279,7 @@ namespace SE
 		T* AddComponent(Args&&... args)
 		{
 			static_assert(std::is_base_of_v<Component, T>, "T must inherit from Component");
-			if (std::is_same_v<T, Transform> && _componentsCount > 0)
+			if constexpr (std::is_same_v<T, Transform>)
 			{
 				return GetTransform();
 			}
@@ -259,18 +289,7 @@ namespace SE
 				return existing;
 			}
 
-			s8 itemsLeft = _components.size() - _componentsCount;
-			ASSERT(itemsLeft > 0);
-			std::shared_ptr<T> item = std::make_shared<T>(std::forward<Args>(args)...);
-
-			_components[_componentsCount] = std::move(item);
-			auto ptr = _components[_componentsCount].get();
-			_componentsCount++;
-
-			ptr->SetGameObject(this);
-			ptr->Start();
-
-			return dynamic_cast<T*>(ptr);
+			return AddComponentPrivate<T>(std::forward<Args>(args)...);
 		}
 
 		bool IsEnabled() const
@@ -318,6 +337,36 @@ namespace SE
 					item->Update(deltaTime);
 			}
 		}
+	};
+
+	class MeshRendererComponent : public Component
+	{
+	private:
+		FixedString<128> _path{};
+		bool _isLoaded = false;
+		Model _model{};
+
+	public:
+		void SetPath(pcstr path);
+
+		void Load();
+
+		void Unload();
+
+		void Render() const;
+	};
+
+	class CameraComponent : public Component
+	{
+	private:
+		Camera _camera = {};
+
+	public:
+		void Start() override;
+
+		void BeginRender3D() const;
+
+		void EndRender3D() const;
 	};
 }
 

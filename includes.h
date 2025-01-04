@@ -26,6 +26,8 @@
 #define ASSERT_EXTRA(X)
 #endif
 
+#define RESOURCES_PATH "Resources/"
+
 #include "semath.h"
 #include "sestring.h"
 
